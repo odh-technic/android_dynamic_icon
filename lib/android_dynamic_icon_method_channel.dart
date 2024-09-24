@@ -18,4 +18,9 @@ class MethodChannelAndroidDynamicIcon extends AndroidDynamicIconPlatform {
   Future<void> changeIcon({required List<String> classNames}) async {
     await methodChannel.invokeMethod("changeIcon", classNames);
   }
+
+  @override
+  Future<String?> getCurrentIcon() async {
+    return await methodChannel.invokeMethod("getCurrentIcon") as String?;
+  }
 }

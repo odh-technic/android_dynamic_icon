@@ -31,4 +31,8 @@ abstract class AndroidDynamicIconPlatform extends PlatformInterface {
   Future<void> changeIcon({required List<String> classNames}) {
     throw UnimplementedError('changeIcon() has not been implemented.');
   }
+
+  Future<String?> getCurrentIcon() async {
+    throw UnimplementedError('getCurrentIcon() has not been implemented.');
+  }
 }
