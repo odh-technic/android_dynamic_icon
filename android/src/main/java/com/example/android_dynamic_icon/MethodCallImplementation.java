@@ -52,7 +52,12 @@ public class MethodCallImplementation implements MethodCallHandler {
           }
         case "changeIcon":
           {
-              changeIcon(call);
+              changeIcon(call, result);
+              break;
+          }
+        case "getCurrentIcon":
+          {
+              getCurrentIcon(result);
               break;
           }
         default:
@@ -61,7 +66,7 @@ public class MethodCallImplementation implements MethodCallHandler {
       }
   }
 
-  private void changeIcon(MethodCall call) {
+  private void changeIcon(MethodCall call, Result result) {
         if(classNames == null || classNames.isEmpty()) {
         Log.e(TAG,"Initialization Failed!");
         Log.i(TAG,"List all the activity-alias class names in initialize()");
@@ -70,6 +75,7 @@ public class MethodCallImplementation implements MethodCallHandler {
 
       args = call.arguments();
       iconChanged = true;
+      result.success(true);
   }
 
   void updateIcon() {
@@ -79,7 +85,8 @@ public class MethodCallImplementation implements MethodCallHandler {
         String packageName = activity.getPackageName();
         int componentState = PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
         int i=0;
-        for(;i<classNames.size();i++) {
+
+        for (;i<classNames.size();i++) {
             ComponentName cn = new ComponentName(packageName, packageName+"."+classNames.get(i));
             if(className.equals(classNames.get(i))) {
                 componentState = PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
@@ -90,12 +97,35 @@ public class MethodCallImplementation implements MethodCallHandler {
             pm.setComponentEnabledSetting(cn, componentState, PackageManager.DONT_KILL_APP);
         }
 
-        if(i>classNames.size()) {
+        if (i>classNames.size()) {
             Log.e(TAG,"class name "+className+" did not match in the initialized list.");
             return;
         }
+
         iconChanged = false;
         Log.d(TAG,"Icon switched to "+className);
-     }
+      }
+  }
+
+  private void getCurrentIcon(Result result) {
+    try {
+        PackageManager pm = activity.getPackageManager();
+        String packageName = activity.getPackageName();
+
+        for (String className : classNames) {
+            ComponentName cn = new ComponentName(packageName, packageName + "." + className);
+            int state = pm.getComponentEnabledSetting(cn);
+
+            if (state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+                result.success(className);
+                return;
+            }
+        }
+
+        // If no component is enabled, return a default value
+        result.success(null);
+    } catch (Exception e) {
+        result.error("ERROR", "Failed to get the current icon", e.getMessage());
     }
+  }
 }
